@@ -1,5 +1,6 @@
 #include <GyverOLED.h>
 #include <OneButton.h>
+#include <NewPing.h>
 #define ENC_A  2
 #define ENC_B  3
 #define BUTTON1_PIN 1
@@ -8,8 +9,12 @@
 #define GREEN_PIN 10
 #define BLUE_PIN 11
 #define ROLLER_MAX 1560
+#define TRIG_PIN 4
+#define ECHO_PIN 5 
+#define MAX_DISTANCE 200
 
 GyverOLED<SSH1106_128x64> oled;
+NewPing sonar(TRIG_PIN, ECHO_PIN, MAX_DISTANCE);
 OneButton button1 = OneButton(BUTTON1_PIN, true);
 OneButton button2 = OneButton(BUTTON2_PIN, true);
 bool isstart = false;
@@ -23,20 +28,19 @@ int cnt = 0;
 void init_mainmenu(){
   dot_state = 0;
   oled.clear();
-  oled.setCursorXY(32, 10);
-  oled.print("Menu");
-  uint8_t dot_y = 20 + 10 * dot_state;
-  oled.dot(32, dot_y);
-  oled.setCursorXY(80, 20);
+  uint8_t dot_y = 3 + 12 * dot_state;
+  oled.circle(20,dot_y,2,1);
+  oled.setCursorXY(30, 0);
   oled.print("Rangefinder");
-  oled.setCursorXY(80, 30);
+  oled.setCursorXY(30, 12);
   oled.print("Voltage Meter");
-  oled.setCursorXY(80, 40);
+  oled.setCursorXY(30, 24);
   oled.print("Oscilloscope");
-  oled.setCursorXY(80, 50);
+  oled.setCursorXY(30, 36);
   oled.print("Music Player");
-  oled.setCursorXY(80, 60);
+  oled.setCursorXY(30, 48);
   oled.print("Flashlight");
+  oled.update();
 }
 
 void count_1(){
@@ -141,9 +145,17 @@ void button1_longpress(){
 }
 
 void button1_doubleclick(){
- 
-  if(dot_state == 0){
-
+  if(!isstart)return;
+  else{
+  if(dot_state == 0){//测距功能（Rangefinder）
+  if(!isconfirmed){//确认处于菜单界面
+    oled.clear();
+    oled.setCursorXY(30,10);
+    oled.print("Rangefinder");
+    oled.update();
+    isconfirmed = true;
+  }
+    
   }
   if(dot_state == 1){
 
@@ -171,7 +183,7 @@ void button1_doubleclick(){
       analogWrite(GREEN_PIN,0);
       analogWrite(BLUE_PIN,0);
     }
-  }
+  }}
   //双击之后，必不会处理滚轮
   processInterrupt = false;
 }
@@ -202,8 +214,8 @@ void setup() {
   //exp2.1
   oled.init();
   oled.clear();
-  oled.setScale(1); // 设置文本大小为1
-  oled.setCursor(15, 2); // (x, y)
+  oled.setScale(2); // 设置文本大小为1
+  oled.setCursorXY(32, 22); // (x, y)
   oled.print("Hello!");
   oled.update();
 
@@ -215,12 +227,18 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(ENC_B), count_3, RISING);
   attachInterrupt(digitalPinToInterrupt(ENC_B), count_4, FALLING);
   
+  //设置超声波模块的端口模式
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
 }
 
 void loop() {
   button1.tick();
 
-  if(isconfirmed){
-    
+  if(isstart && isconfirmed){//确认在功能界面
+    if(dot_state == 0){//测距功能
+      int distance = sonar.ping_cm();
+
+    }
   }
 }
