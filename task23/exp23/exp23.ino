@@ -1,10 +1,13 @@
 #include <GyverOLED.h>
 #include <OneButton.h>
+#define ENC_A  2
+#define ENC_B  3
 #define BUTTON1_PIN 1
 #define BUTTON2_PIN 2
 #define RED_PIN 9
 #define GREEN_PIN 10
 #define BLUE_PIN 11
+#define ROLLER_MAX 1560
 
 GyverOLED<SSH1106_128x64> oled;
 OneButton button1 = OneButton(BUTTON1_PIN, true);
@@ -13,6 +16,8 @@ bool isstart = false;
 bool isconfirmed = false;
 uint8_t dot_state = 0; //对应当前指示哪个菜单选项
 uint8_t light_state = 0; //0:灭，1:蓝色微亮，2:白色微亮，3:白色最亮
+bool processInterrupt = false;
+int cnt = 0;
 
 //显示原始主菜单
 void init_mainmenu(){
@@ -34,9 +39,68 @@ void init_mainmenu(){
   oled.print("Flashlight");
 }
 
+void count_1(){
+  if(!processInterrupt)return;
+  else{if(digitalRead(ENC_B) == LOW)
+  {
+    cnt++;
+    constrain(cnt, 0, ROLLER_MAX);
+  }
+  else{
+    cnt--;
+    constrain(cnt, 0, ROLLER_MAX);
+  }}
+}
+
+void count_2(){
+  if(!processInterrupt)return;
+  else{
+  if(digitalRead(ENC_B) == LOW)
+  {
+    cnt--;
+    constrain(cnt, 0, ROLLER_MAX);
+  }
+  else{
+    cnt++;
+    constrain(cnt, 0, ROLLER_MAX);
+  }
+  }
+}
+
+void count_3(){
+  if(!processInterrupt)return;
+  else{
+  if(digitalRead(ENC_A) == HIGH)
+  {
+    cnt++;
+    constrain(cnt, 0, ROLLER_MAX);
+  }
+  else{
+    cnt--;
+    constrain(cnt, 0, ROLLER_MAX);
+  }
+  }
+}
+
+void count_4(){
+  if(!processInterrupt)return;
+  else{
+  if(digitalRead(ENC_A) == LOW)
+  {
+    cnt++;
+    constrain(cnt, 0, ROLLER_MAX);
+  }
+  else{
+    cnt--;
+    constrain(cnt, 0, ROLLER_MAX);
+  }
+  }
+}
+
 void button1_longpress(){
   //如果还没有开始进入到主菜单中，从欢迎界面进入主菜单
   if(!isstart){
+  processInterrupt = true;
   isstart = true;
   init_mainmenu();
   }
@@ -65,10 +129,13 @@ void button1_longpress(){
       }
       //显示主菜单界面
       init_mainmenu();
+      processInterrupt = true;
 
     }
+    //从主界面返回主界面
     else{
       init_mainmenu();
+      processInterrupt = true;
     }
   }
 }
@@ -105,7 +172,8 @@ void button1_doubleclick(){
       analogWrite(BLUE_PIN,0);
     }
   }
-
+  //双击之后，必不会处理滚轮
+  processInterrupt = false;
 }
 void button1_singleclick_flashlight(){
   light_state = (light_state + 1)%4;
@@ -141,6 +209,11 @@ void setup() {
 
   button1.attachLongPressStart(button1_longpress);
   button1.attachDoubleClick(button1_doubleclick);
+
+  attachInterrupt(digitalPinToInterrupt(ENC_A), count_1, RISING);
+  attachInterrupt(digitalPinToInterrupt(ENC_A), count_2, FALLING);
+  attachInterrupt(digitalPinToInterrupt(ENC_B), count_3, RISING);
+  attachInterrupt(digitalPinToInterrupt(ENC_B), count_4, FALLING);
   
 }
 
