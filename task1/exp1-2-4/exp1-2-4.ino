@@ -61,6 +61,7 @@ void count_4(){
 Servo myservo;
 
 void setup(){
+  Serial.begin(9600);
   pinMode(ENC_A, INPUT);
   pinMode(ENC_B, INPUT); //可能需要使用PULLUP
   myservo.attach(SERVO_PIN);
@@ -74,6 +75,7 @@ void setup(){
 }
 
 void loop(){
+  Serial.println(cnt);
   long servo_angle = map(cnt,0,COUNTS_PER_OUTPUT_REV,0,180);
 
   if(servo_angle != prev_angle){
