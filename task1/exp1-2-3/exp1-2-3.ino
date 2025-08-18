@@ -13,6 +13,7 @@ void add_clicked(){
   number++;
   int number_len = String(number).length() * 6;
   int startX = (128 - number_len) / 2;
+  oled.clear();
   oled.setCursorXY(startX, 30);
   oled.println((String)number); 
   oled.update();
@@ -22,6 +23,7 @@ void minus_clicked(){
   number--;
   int number_len = String(number).length() * 6;
   int startX = (128 - number_len) / 2;
+  oled.clear();
   oled.setCursorXY(startX, 30);
   oled.println((String)number);
   oled.update();  
@@ -38,6 +40,9 @@ void setup() {
   oled.setCursorXY(startX, 30);
   oled.println((String)number);
   oled.update();  
+
+  add_button.attachClick(add_clicked);
+  minus_button.attachClick(minus_clicked);
 }
 
 void loop() {
