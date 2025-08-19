@@ -22,6 +22,10 @@ const int encoder_ppr = 13, gear_ratio = 30;
 const int counts_per_rev = encoder_ppr * gear_ratio * 4;
 //变量值
 float distance = 0.0;
+int cur_channel_idx = 0;
+float voltage = 0.0;
+int progress = 0;
+int analog_value[128];
 
 U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, SCL_PIN, SDA_PIN, U8X8_PIN_NONE);
 SoftwareSerial arduinoSerial(RX_PIN, TX_PIN);
@@ -77,7 +81,54 @@ void calculate_roller(){
     menu_idx = int(cnt / (counts_per_rev / 5));
   }
 }
-
+void Uart_communicate(){
+  if(arduinoSerial.available()){
+    String info = arduinoSerial.readStringUntil('\n');
+    info.trim();
+    if(info == "ui"){
+      inMenu = true;
+      inFunction = false;
+      threshold = false;
+    }
+    if(info == "confirm"){
+      if(inMenu){
+        inMenu = false;
+        inFunction = true;
+        threshold = false;
+        arduinoSerial.print("Mode=");
+        arduinoSerial.println(menu_mark[menu_idx]);
+      }
+    }
+    if(info == "range_threshold"){
+      if(inFunction && menu_idx == 0){
+        threshold = !threshold;
+      }
+    }
+    if(info == "change"){
+      if(inFunction && menu_idx == 2){
+        cur_channel_idx = (cur_channel_idx + 1) % 6;
+        arduinoSerial.print("Channel=");
+        arduinoSerial.println(cur_channel_idx);        
+      }
+    }
+    if(info.startsWith("Voltage=")){
+      voltage = info.substring(8).toFloat();
+    }
+    if(info.startsWith("Distance=")){
+      distance = info.substring(9).toFloat();
+    }
+    if(info.startsWith("Analog=")){
+      int read_value = info.substring(7).toInt();
+      for(int i = 0; i < 127; i++){
+        analog_value[i] = analog_value[i+1];
+      }
+      analog_value[127] = map(read_value, 0, 1023, 0, 44);
+    }
+    if(info.startsWith("Progress=")){
+      progress = info.substring(9).toInt();
+    }
+  }
+}
 
 void setup() {
   pinMode(ENC_A, INPUT_PULLUP);

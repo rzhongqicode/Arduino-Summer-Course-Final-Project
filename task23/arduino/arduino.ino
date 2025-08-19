@@ -161,9 +161,9 @@ void VoltageMeter(){
 void Oscilloscope(){
   int cur_channel = channels[cur_channel_idx];
   int analog_value = analogRead(cur_channel);
-  float voltage = analog_value * 5.0 / 1023.0;
+  // float voltage = analog_value * 5.0 / 1023.0;
   Serial.print("Analog=");
-  Serial.println(voltage);
+  Serial.println(analog_value);
 }
 
 //音乐播放功能
@@ -223,7 +223,7 @@ void button1_singleClick(){
 }
 void button1_doubleClick(){
   if(cur_mode == 'U'){//在主菜单
-    Serial.println("c"); //发送c (confirm)确定当前功能, 此处需要确定当前cur_mode？？？
+    Serial.println("confirm"); //发送c (confirm)确定当前功能, 此处需要确定当前cur_mode？？？
   }
   if(cur_mode == 'F'){//在闪光灯
     LedState = 0;
@@ -231,19 +231,19 @@ void button1_doubleClick(){
   }
 }
 void button1_longpress(){
-  Serial.println("u"); //发送u, ui菜单，返回主菜单
+  Serial.println("ui"); //发送u, ui菜单，返回主菜单
   cur_mode = 'U';
 }
 void button2_longpress()
 {
   if(cur_mode == 'R'){//在测距模式
-    Serial.println("r");
+    Serial.println("range_threshold");
     threshold = !threshold;
   }
 }
 void button2_singleClick(){
    if(cur_mode == 'O'){//在示波器
-    Serial.println("c"); //发送c， change改变通道
+    Serial.println("change"); //发送c， change改变通道
   }
   if(cur_mode == 'M'){//在音乐
     if(music_is_on){
