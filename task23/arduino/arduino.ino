@@ -89,6 +89,10 @@ void RangeFinder(){
   else{//在测距模式
     digitalWrite(blue_pin, LOW);
 
+    //在测距模式下，向esp发送距离值
+    Serial.print("Distance=");
+    Serial.println(distance, 2);
+
     //报警功能
     if(distance < distance_threshold){
       digitalWrite(green_pin, LOW);
