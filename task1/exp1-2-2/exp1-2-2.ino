@@ -23,6 +23,11 @@ void longPress(){
     analog_value = 0;
     state = 0;
   }
+  else{
+    analogWrite(RED_PIN,0);
+    analogWrite(GREEN_PIN,0);
+    analogWrite(BLUE_PIN,0);
+  }
 }
 
 void setup() {

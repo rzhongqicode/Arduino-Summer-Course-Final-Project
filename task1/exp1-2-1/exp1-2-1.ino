@@ -4,7 +4,7 @@
 unsigned long prev_time = 0;
 int interval_time = 50;
 int direction = 1;
-int step = 5;
+int step = 10;
 int analog_value = 0;
 int state = 0;
 
