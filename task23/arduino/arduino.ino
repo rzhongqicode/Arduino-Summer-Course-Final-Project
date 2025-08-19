@@ -29,11 +29,12 @@ int LedState = 0;
 
 //音乐播放有关量
 int cur_beat = 0;//标定当前第几个音节
-unsigned long prev_beatTime = 0;//标定上个音节的开始时间
+unsigned long prev_changeBeat_time = 0;//标定上个音节的开始时间
 const int beats[] = {784, 784, 880, 587, 523, 523, 440, 587, 784, 880, 1046, 880, 784, 523, 523, 440, 587};
 const int durations[] = {600, 300, 300, 1200, 600, 300, 300, 1200, 600, 300, 300, 300, 300, 600, 300, 300, 1200};
 int total_beats = sizeof(beats) / sizeof(int);
 unsigned long prev_progress_time = 0;
+
 
 //蓝灯呼吸有关量
 unsigned long prev_breath_time = 0;
@@ -48,12 +49,18 @@ bool buzz_on = false;
 unsigned long prev_buzz_time = 0;
 int buzz_on_time = 100;
 int buzz_off_time = 100;
+unsigned long prev_R_time = 0;
 
 //测电压有关量
 const int channels[] = {A0, A1, A2, A3, A4, A5};
+unsigned long prev_V_time = 0;
 
 //示波器有关量
 int cur_channel_idx = 0;
+unsigned long prev_O_time = 0;
+
+//通信有关量
+String str_read = "";
 
 
 OneButton button_1(button_1_pin, true);
@@ -184,6 +191,27 @@ void MusicPlayer(){
   }
 }
 
+void Uart_receive(){
+  while(Serial.available()){
+    char char_read = (char)Serial.read();
+    if(char_read != '\n'){
+      str_read += char_read;
+    }
+    else{
+      str_read.trim();
+      if(str_read.startsWith("Mode=")){
+        cur_mode = str_read.charAt(5);
+      }
+      if(str_read.startsWith("Threshold=")){
+        distance_threshold = str_read.substring(10).toInt();
+      }
+      if(str_read.startsWith("Channel=")){
+        cur_channel_idx = str_read.substring(8).toInt();
+      }
+      str_read = "";
+    }
+  }
+}
 
 //按键1单击
 void button1_singleClick(){
@@ -198,9 +226,8 @@ void button1_doubleClick(){
     Serial.println("c"); //发送c (confirm)确定当前功能, 此处需要确定当前cur_mode？？？
   }
   if(cur_mode == 'F'){//在闪光灯
-    digitalWrite(red_pin, LOW);
-    digitalWrite(blue_pin, LOW);
-    digitalWrite(green_pin, LOW);
+    LedState = 0;
+    updateLed();
   }
 }
 void button1_longpress(){
@@ -224,7 +251,7 @@ void button2_singleClick(){
     }
     else{
       cur_beat = 0;
-      prev_beatTime = millis();
+      prev_changeBeat_time = millis();
     }
     music_is_on = !music_is_on;
   }
@@ -256,4 +283,43 @@ void setup() {
 void loop() {
   button_1.tick();
   button_2.tick();
+  Uart_receive();
+
+  switch(cur_mode){
+    case 'W': break;
+    case 'U': {
+        LedState = 0; 
+        threshold = false;
+        music_is_on = false; 
+        buzz_on = false;
+        breath_value = 0;
+        cur_channel_idx = 0;
+        break;
+        }
+    case 'R':{
+      if(millis() - prev_R_time >= 200){
+        prev_R_time = millis();
+        RangeFinder();
+      }
+    }
+    case 'V':{
+      if(millis() - prev_V_time >= 200){
+        prev_V_time = millis();
+        VoltageMeter();
+      }
+    }
+    case 'O':{
+      if(millis() - prev_O_time >= 200){
+        prev_O_time = millis();
+        Oscilloscope();
+      }
+    }
+    case 'M':{
+      MusicPlayer();
+      break;
+    }
+    case 'F':{
+      break;
+    }
+  }
 }
