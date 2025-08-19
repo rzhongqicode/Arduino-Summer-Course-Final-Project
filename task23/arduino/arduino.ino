@@ -48,6 +48,9 @@ int buzz_off_time = 100;
 //测电压有关量
 const int channels[] = {A0, A1, A2, A3, A4, A5};
 
+//示波器有关量
+int cur_channel_idx = 0;
+
 
 OneButton button_1(button_1_pin, true);
 OneButton button_2(button_2_pin, true);
@@ -136,14 +139,21 @@ void RangeFinder(){
 void VoltageMeter(){
   int cur_channel = channels[0];
   int analog_value = analogRead(cur_channel);
-  float voltage = analog_value * 5.0 / 1023.0;\
+  float voltage = analog_value * 5.0 / 1023.0;
   int angle = map(voltage, 0, 5, 10, 170);
   myservo.write(angle);
   Serial.print("Voltage=");
   Serial.println(voltage,2);
-
 }
 
+//示波器测电压功能
+void Oscilloscope(){
+  int cur_channel = channels[cur_channel_idx];
+  int analog_value = analogRead(cur_channel);
+  float voltage = analog_value * 5.0 / 1023.0;
+  Serial.print("Analog=");
+  Serial.println(voltage);
+}
 
 //按键1单击
 void button1_singleClick(){
