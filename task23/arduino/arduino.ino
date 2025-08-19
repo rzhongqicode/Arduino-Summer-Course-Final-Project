@@ -4,6 +4,8 @@ const int button_1_pin = 8;
 const int button_2_pin = 2;
 const int red_pin = 9, green_pin = 10, blue_pin = 11;
 const int buzz_pin = 3;
+const int trig_pin = 5;
+const int echo_pin = 4;
 
 //标定当前的状态
 char cur_mode = 'W';
@@ -35,6 +37,11 @@ int step_breath = 10;
 int direction_breath = 1;
 int breath_value = 0;
 
+//与测距,警报有关量
+int distance_threshold = 15;
+bool buzz_on = false;
+unsigned long prev_buzz_time = 0;
+
 OneButton button_1(button_1_pin, true);
 OneButton button_2(button_2_pin, true);
 
@@ -63,6 +70,57 @@ void blueLed_breathe(){
     analogWrite(blue_pin, breath_value);
   }
 }
+
+
+//RangeFinder测距功能
+void RangeFinder(){
+  digitalWrite(trig_pin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig_pin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig_pin, LOW);
+  float duration_time = pulseIn(echo_pin, HIGH, 30000); 
+  float distance = duration * 0.0344 / 2;
+
+  //控制LED灯
+  if(threshold){//在阈值模式
+    blueLed_breathe();
+  }
+  else{//在测距模式
+    digitalWrite(blue_pin, LOW);
+
+    //报警功能
+    if(distance < distance_threshold){
+      digitalWrite(green_pin, LOW);
+      buzz_on_time = map(distance*100, distanceThreshold * 100, 0, 500, 30);
+
+      buzz_off_time = map(distance*100, distanceThreshold * 100, 0, 150, 30);
+      if(buzz_on){
+        if(millis() - prev_buzz_time > buzz_on_time){
+          noTone(buzz_pin);
+          buzz_on = !buzz_on;
+          prev_buzz_time = millis();
+          digitalWrite(red_pin, LOW);
+        }
+      }
+      else{
+        if(millis() - prev_buzz_time > buzz_off_time){
+          tone(buzz_pin, 800);
+          buzz_on = !buzz_on;
+          prev_buzz_time = millis();
+          digitalWrite(red_pin, HIGH);
+        }
+      }
+    }
+    else{
+      noTone(buzz_pin);
+      digitalWrite(red_pin, LOW);
+      digitalWrite(green_pin, HIGH);
+      buzz_on = false;
+    }
+  }
+}
+
 
 
 //按键1单击
@@ -133,5 +191,4 @@ void setup() {
 void loop() {
   button_1.tick();
   button_2.tick();
-
 }
