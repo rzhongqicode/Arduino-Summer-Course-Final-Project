@@ -1,11 +1,12 @@
 #include <OneButton.h>
-
+#include <Servo.h>
 const int button_1_pin = 8;
 const int button_2_pin = 2;
 const int red_pin = 9, green_pin = 10, blue_pin = 11;
 const int buzz_pin = 3;
 const int trig_pin = 5;
 const int echo_pin = 4;
+const int servo_pin = 6;
 
 //标定当前的状态
 char cur_mode = 'W';
@@ -41,9 +42,16 @@ int breath_value = 0;
 int distance_threshold = 15;
 bool buzz_on = false;
 unsigned long prev_buzz_time = 0;
+int buzz_on_time = 100;
+int buzz_off_time = 100;
+
+//测电压有关量
+const int channels[] = {A0, A1, A2, A3, A4, A5};
+
 
 OneButton button_1(button_1_pin, true);
 OneButton button_2(button_2_pin, true);
+Servo myservo;
 
 //LED功能
 void updateLed(){
@@ -80,7 +88,7 @@ void RangeFinder(){
   delayMicroseconds(10);
   digitalWrite(trig_pin, LOW);
   float duration_time = pulseIn(echo_pin, HIGH, 30000); 
-  float distance = duration * 0.0344 / 2;
+  float distance = duration_time * 0.0344 / 2;
 
   //控制LED灯
   if(threshold){//在阈值模式
@@ -96,9 +104,9 @@ void RangeFinder(){
     //报警功能
     if(distance < distance_threshold){
       digitalWrite(green_pin, LOW);
-      buzz_on_time = map(distance*100, distanceThreshold * 100, 0, 500, 30);
+      buzz_on_time = map(distance*100, distance_threshold * 100, 0, 500, 30);
 
-      buzz_off_time = map(distance*100, distanceThreshold * 100, 0, 150, 30);
+      buzz_off_time = map(distance*100, distance_threshold * 100, 0, 150, 30);
       if(buzz_on){
         if(millis() - prev_buzz_time > buzz_on_time){
           noTone(buzz_pin);
@@ -124,7 +132,17 @@ void RangeFinder(){
     }
   }
 }
+//voltage meter测电压功能
+void VoltageMeter(){
+  int cur_channel = channels[0];
+  int analog_value = analogRead(cur_channel);
+  float voltage = analog_value * 5.0 / 1023.0;\
+  int angle = map(voltage, 0, 5, 10, 170);
+  myservo.write(angle);
+  Serial.print("Voltage=");
+  Serial.println(voltage,2);
 
+}
 
 
 //按键1单击
@@ -189,6 +207,9 @@ void setup() {
   button_2.attachLongPressStop(button2_longpress);
   //按键2单击
   button_2.attachClick(button2_singleClick);
+  //绑定舵机
+  myservo.attach(servo_pin);
+  myservo.write(10);//初始化
 }
 
 
