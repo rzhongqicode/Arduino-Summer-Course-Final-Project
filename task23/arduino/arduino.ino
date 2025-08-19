@@ -30,6 +30,10 @@ int LedState = 0;
 //音乐播放有关量
 int cur_beat = 0;//标定当前第几个音节
 unsigned long prev_beatTime = 0;//标定上个音节的开始时间
+const int beats[] = {784, 784, 880, 587, 523, 523, 440, 587, 784, 880, 1046, 880, 784, 523, 523, 440, 587};
+const int durations[] = {600, 300, 300, 1200, 600, 300, 300, 1200, 600, 300, 300, 300, 300, 600, 300, 300, 1200};
+int total_beats = sizeof(beats) / sizeof(int);
+unsigned long prev_progress_time = 0;
 
 //蓝灯呼吸有关量
 unsigned long prev_breath_time = 0;
@@ -154,6 +158,32 @@ void Oscilloscope(){
   Serial.print("Analog=");
   Serial.println(voltage);
 }
+
+//音乐播放功能
+void MusicPlayer(){
+  if(music_is_on){
+    if(millis() - prev_changeBeat_time > durations[cur_beat]){
+      cur_beat += 1;
+      prev_changeBeat_time = millis();
+      if(cur_beat < total_beats){
+        tone(buzz_pin, beats[cur_beat]);
+        if(millis() - prev_progress_time >= 300){
+          Serial.print("Progress=");
+          Serial.println(cur_beat);
+          prev_progress_time = millis();
+        }
+      }
+      else{//关闭音乐
+        music_is_on = false;
+        noTone(buzz_pin);
+        cur_beat = 0;
+        Serial.print("Progress=");
+        Serial.println(cur_beat);
+      }
+    }
+  }
+}
+
 
 //按键1单击
 void button1_singleClick(){
