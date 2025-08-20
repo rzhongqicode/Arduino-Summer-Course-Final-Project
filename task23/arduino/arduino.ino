@@ -90,6 +90,7 @@ void blueLed_breathe(){
       breath_value = 0;
     }
     analogWrite(blue_pin, breath_value);
+    digitalWrite(green_pin, LOW);
   }
 }
 
@@ -104,9 +105,7 @@ void RangeFinder(){
   float duration_time = pulseIn(echo_pin, HIGH, 30000); 
   float distance = duration_time * 0.0344 / 2;
 
-  //向esp发送距离值
-  Serial.print("Distance=");
-  Serial.println(distance, 2);
+
 
   //控制LED灯
   if(threshold){//在阈值模式
@@ -114,7 +113,9 @@ void RangeFinder(){
   }
   else{//在测距模式
     digitalWrite(blue_pin, LOW);
-
+      //向esp发送距离值
+    Serial.print("Distance=");
+    Serial.println(distance, 2);
     //报警功能
     if(distance < distance_threshold){
       digitalWrite(green_pin, LOW);

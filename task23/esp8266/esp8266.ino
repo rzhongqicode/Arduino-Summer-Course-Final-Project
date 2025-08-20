@@ -98,7 +98,7 @@ void calculate_roller(){
 }
 
 void Uart_communicate(){
-  if(arduinoSerial.available()){
+  while(arduinoSerial.available()){
     String info = arduinoSerial.readStringUntil('\n');
     info.trim();
     if(info == "ui"){
@@ -116,9 +116,9 @@ void Uart_communicate(){
       }
     }
     if(info == "range_threshold"){
-      if(inFunction && menu_idx == 0){
+      // if(inFunction && menu_idx == 0){
         threshold = !threshold;
-      }
+      // }
     }
     if(info == "change"){
       if(inFunction && menu_idx == 2){
