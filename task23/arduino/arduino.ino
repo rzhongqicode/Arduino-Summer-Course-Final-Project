@@ -248,9 +248,11 @@ void button2_singleClick(){
   if(cur_mode == 'M'){//在音乐
     if(music_is_on){
       noTone(buzz_pin);
+      // Serial.println("Off");
     }
     else{
       // cur_beat = 0;
+      // Serial.println("On");
       prev_changeBeat_time = millis();
     }
     music_is_on = !music_is_on;

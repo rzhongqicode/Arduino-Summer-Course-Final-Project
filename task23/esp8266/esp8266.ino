@@ -30,6 +30,8 @@ int progress = 0;
 int analog_value[128];
 unsigned long prev_pro_time = 0;
 bool led_is_on = false;
+const char* music_state_str[] = {"Off", "On"};
+int music_state = 0;
 
 byte xpos = 0; 
 byte ypos = 0; 
@@ -125,6 +127,12 @@ void Uart_communicate(){
         arduinoSerial.println(cur_channel_idx);        
       }
     }
+    // if(info == "Off"){
+    //   music_state = 0;
+    // }
+    // if(info == "On"){
+    //   music_state = 1;
+    // }
     if(info.startsWith("Voltage=")){
       voltage = info.substring(8).toFloat();
     }
@@ -221,11 +229,11 @@ void MusicPlayer(){
   // u8g2.print("Playing Music...");
   u8g2.setCursor(50, 60);
 
-  if (progress > 0 && progress < 17) {
-    u8g2.print("On");
-  } else {
-     u8g2.print("Off");
-  }
+  // if (progress > 0 && progress < 17) {
+  //   u8g2.print("On");
+  // } else {
+  //    u8g2.print("Off");
+  // }
 }
 //闪光灯界面
 void Flashlight(){
