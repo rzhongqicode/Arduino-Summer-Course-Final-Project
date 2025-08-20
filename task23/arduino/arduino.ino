@@ -72,7 +72,7 @@ void updateLed(){
     switch (LedState) {
     case 0: analogWrite(red_pin, 0); analogWrite(green_pin, 0); analogWrite(blue_pin, 0); break;
     case 1: analogWrite(red_pin, 0); analogWrite(green_pin, 0); analogWrite(blue_pin, 128); break;
-    case 2: analogWrite(red_pin, 150); analogWrite(green_pin, 150); analogWrite(blue_pin, 70); break;
+    case 2: analogWrite(red_pin, 150); analogWrite(green_pin, 150); analogWrite(blue_pin, 50); break;
     case 3: analogWrite(red_pin, 255); analogWrite(green_pin, 255); analogWrite(blue_pin, 255); break;
   }
 }
@@ -250,7 +250,7 @@ void button2_singleClick(){
       noTone(buzz_pin);
     }
     else{
-      cur_beat = 0;
+      // cur_beat = 0;
       prev_changeBeat_time = millis();
     }
     music_is_on = !music_is_on;
@@ -294,6 +294,8 @@ void loop() {
         buzz_on = false;
         breath_value = 0;
         cur_channel_idx = 0;
+        cur_beat = 0;
+        updateLed();
         break;
         }
     case 'R':{

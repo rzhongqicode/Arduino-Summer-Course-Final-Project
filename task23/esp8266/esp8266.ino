@@ -1,5 +1,6 @@
 #include <U8g2lib.h>
 #include <SoftwareSerial.h>
+#include <Wire.h>
 #include "bitmap.h"
 #define SCL_PIN 5
 #define SDA_PIN 4
@@ -7,6 +8,7 @@
 #define TX_PIN 15
 #define ENC_A 12
 #define ENC_B 14
+
 //判断当前所处的状态的变量
 bool inMenu = false;
 bool inFunction = false;
@@ -39,8 +41,9 @@ char selected_item_name[20] = "---";
 
 U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, SCL_PIN, SDA_PIN, U8X8_PIN_NONE);
 SoftwareSerial arduinoSerial(RX_PIN, TX_PIN);
+
 //编码器计数中断程序
-void count_1(){
+ICACHE_RAM_ATTR void count_1(){
   if(digitalRead(ENC_B) == LOW)
   {
     cnt++;
@@ -50,7 +53,7 @@ void count_1(){
   }
 }
 
-void count_2(){
+ICACHE_RAM_ATTR void count_2(){
   if(digitalRead(ENC_B) == LOW)
   {
     cnt--;
@@ -60,7 +63,7 @@ void count_2(){
   }
 }
 
-void count_3(){
+ICACHE_RAM_ATTR void count_3(){
   if(digitalRead(ENC_A) == HIGH)
   {
     cnt++;
@@ -70,7 +73,7 @@ void count_3(){
   }
 }
 
-void count_4(){
+ICACHE_RAM_ATTR void count_4(){
   if(digitalRead(ENC_A) == LOW)
   {
     cnt++;
@@ -88,9 +91,10 @@ void calculate_roller(){
     cnt -= counts_per_rev;
   }
   if(inMenu){
-    menu_idx = int(cnt / (counts_per_rev / 5));
+    menu_idx = (int)(cnt / (counts_per_rev / 5));
   }
 }
+
 void Uart_communicate(){
   if(arduinoSerial.available()){
     String info = arduinoSerial.readStringUntil('\n');
@@ -149,13 +153,13 @@ void Rangefinder(){
 
   if(threshold){
     calculate_roller();
-    threshold = map(cnt, 0, counts_per_rev, 10, 50);
+    distance_threshold = map(cnt, 0, counts_per_rev, 10, 50);
     arduinoSerial.print("Threshold=");
-    arduinoSerial.println(threshold);
+    arduinoSerial.println(distance_threshold);
   }
   u8g2.setCursor(10, 60);
   u8g2.print("Threshold: ");
-  u8g2.print(threshold);
+  u8g2.print(distance_threshold);
 }
 //VoltageMeter测电压界面,画一个dashboard
 void VoltageMeter(){
@@ -214,13 +218,13 @@ void MusicPlayer(){
   u8g2.drawBox(15, 36, barwidth, 10);
   u8g2.setFont(u8g2_font_ncenB08_tr);
   u8g2.setCursor(15, 30);
-  u8g2.print("Playing Music...");
+  // u8g2.print("Playing Music...");
   u8g2.setCursor(50, 60);
 
   if (progress > 0 && progress < 17) {
-    u8g2.print("Playing");
+    u8g2.print("On");
   } else {
-     u8g2.print("Paused");
+     u8g2.print("Off");
   }
 }
 //闪光灯界面
@@ -313,7 +317,6 @@ void setup() {
   u8g2.drawStr(20, 40, "Welcome!");
   u8g2.sendBuffer();
   delay(1500);
-  digitalWrite(LED_BUILTIN, HIGH);
   u8g2.setDrawColor(1); 
   u8g2.setBitmapMode(1); 
   u8g2.setFontMode(1);
