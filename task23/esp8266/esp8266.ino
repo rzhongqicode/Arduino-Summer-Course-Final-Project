@@ -180,7 +180,7 @@ void VoltageMeter(){
   int Y_end = Y - (R - 5) * sin(angle_circle);
   u8g2.drawLine(X, Y, X_end, Y_end);
   u8g2.setFont(u8g2_font_logisoso16_tr);
-  u8g2.setCursor(30, 40);
+  u8g2.setCursor(40, 40);
   u8g2.print(voltage, 2);
   u8g2.print(" V");  
 }
@@ -204,8 +204,8 @@ void Oscilloscope(){
     y2 = constrain(y2, 10, 54); 
     u8g2.drawLine(x1, y1, x2, y2);
   }
-  u8g2.setCursor(20, 62); 
-  u8g2.print("Ch: A");
+  u8g2.setCursor(50, 63); 
+  u8g2.print("A");
   u8g2.print(cur_channel_idx);
 }
 //音乐播放器界面
@@ -238,10 +238,8 @@ void MusicPlayer(){
 //闪光灯界面
 void Flashlight(){
   u8g2.setFont(u8g2_font_ncenB08_tr);
-  u8g2.setCursor(10, 40);
-  u8g2.print("Click BTN1 on UNO");
-  u8g2.setCursor(20, 55);
-  u8g2.print("to change brightness.");
+  u8g2.setCursor(35, 40);
+  u8g2.print("Click Button1");
 }
 
 //根据menu_idx绘制功能界面
@@ -314,15 +312,15 @@ void setup() {
   //开机动画和欢迎界面
   u8g2.begin();
   u8g2.enableUTF8Print();
-  for (int i = -32; i < (128 - 32) / 2; i += 4) {
+  for (int y = -32; y <= (64 - 32) / 2; y += 2) {
     u8g2.clearBuffer();
-    u8g2.drawXBMP(i, (64 - 32) / 2, 32, 32, epd_bitmap_icon_cube_00);
+    u8g2.drawXBMP((128 - 32) / 2, y, 32, 32, epd_bitmap_icon_cube_04);
     u8g2.sendBuffer();
     delay(20);
   }
   u8g2.clearBuffer();
-  u8g2.setFont(u8g2_font_ncenB14_tr);
-  u8g2.drawStr(20, 40, "Welcome!");
+  u8g2.setFont(u8g2_font_ncenB10_tr);
+  u8g2.drawStr(20, 40, "Hello world!");
   u8g2.sendBuffer();
   delay(1500);
   u8g2.setDrawColor(1); 
@@ -337,11 +335,12 @@ void loop() {
   } else if (inMenu) {
     calculate_roller();
     MainMenu();
-  } else {
-    u8g2.clearBuffer();
-    u8g2.setFont(u8g2_font_ncenB08_tr);
-    u8g2.drawStr(10, 30, "Long press BTN1");
-    u8g2.drawStr(25, 50, "to enter menu");
-    u8g2.sendBuffer();
-  }
+  } 
+  // else {
+  //   u8g2.clearBuffer();
+  //   u8g2.setFont(u8g2_font_ncenB08_tr);
+  //   u8g2.drawStr(10, 30, "Long press BTN1");
+  //   u8g2.drawStr(25, 50, "to enter menu");
+  //   u8g2.sendBuffer();
+  // }
 }
