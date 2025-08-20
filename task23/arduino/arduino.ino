@@ -38,7 +38,7 @@ unsigned long prev_progress_time = 0;
 
 //蓝灯呼吸有关量
 unsigned long prev_breath_time = 0;
-int interval_bearth = 50;
+int interval_bearth = 20;
 int step_breath = 10;
 int direction_breath = 1;
 int breath_value = 0;
@@ -104,16 +104,16 @@ void RangeFinder(){
   float duration_time = pulseIn(echo_pin, HIGH, 30000); 
   float distance = duration_time * 0.0344 / 2;
 
+  //向esp发送距离值
+  Serial.print("Distance=");
+  Serial.println(distance, 2);
+
   //控制LED灯
   if(threshold){//在阈值模式
     blueLed_breathe();
   }
   else{//在测距模式
     digitalWrite(blue_pin, LOW);
-
-    //在测距模式下，向esp发送距离值
-    Serial.print("Distance=");
-    Serial.println(distance, 2);
 
     //报警功能
     if(distance < distance_threshold){
@@ -265,6 +265,8 @@ void setup() {
   pinMode(green_pin, OUTPUT);
   pinMode(blue_pin, OUTPUT);
   pinMode(buzz_pin, OUTPUT);
+  pinMode(trig_pin, OUTPUT); // 设置 Trig 引脚为输出模式
+  pinMode(echo_pin, INPUT);   // 设置 Echo 引脚为输入模式
   //绑定按键行为
   //按键1单击
   button_1.attachClick(button1_singleClick);
@@ -297,6 +299,7 @@ void loop() {
         breath_value = 0;
         cur_channel_idx = 0;
         cur_beat = 0;
+        noTone(buzz_pin);
         updateLed();
         break;
         }
